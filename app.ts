@@ -1,8 +1,10 @@
 import express, { Application } from "express";
 import { setup } from "./src/api/routes";
 import { errors } from "celebrate";
+import { development } from "./src/database/config";
 import dotenv from "dotenv";
-import { setSwagger } from './src/utils/swagger';
+import { setSwagger } from "./src/utils/swagger";
+import { createConnection } from "typeorm";
 
 dotenv.config();
 
@@ -16,7 +18,12 @@ setSwagger(app);
 setup(app);
 app.use(errors());
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  
-})
+createConnection(development)
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    })
+  })
+  .catch((e) => {
+    console.log("Error: ", e);
+  });
