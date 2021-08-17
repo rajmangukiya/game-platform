@@ -5,6 +5,7 @@ import { development } from "./src/database/config";
 import dotenv from "dotenv";
 import { setSwagger } from "./src/utils/swagger";
 import { createConnection } from "typeorm";
+import cors from "cors"
 
 dotenv.config();
 
@@ -13,6 +14,10 @@ const PORT = process.env.PORT || 5000;
 const app: Application = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: false })) // do not know the exactly use
+app.use(cors({
+  origin: 'http://localhost:3000'
+}))
 
 setSwagger(app);
 setup(app);

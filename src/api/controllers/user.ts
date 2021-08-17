@@ -32,7 +32,7 @@ const signup = {
         },
       });
 
-      if(checkUser) {
+      if (checkUser) {
         return apiResponse(
           res,
           httpStatus.BAD_REQUEST,
@@ -58,7 +58,7 @@ const signup = {
       const user = userRepo.create(newUser);
       const result = await userRepo.save(user);
 
-      if(!result) {
+      if (!result) {
         return apiResponse(
           res,
           httpStatus.BAD_REQUEST,
@@ -105,7 +105,7 @@ const login = {
         where: { email: req.body.email },
       });
 
-      if(!user) {
+      if (!user) {
         return apiResponse(
           res,
           httpStatus.NOT_FOUND,
@@ -117,7 +117,7 @@ const login = {
 
       const checkPassword = await comparePassword(req.body.password, user.password);
 
-      if(!checkPassword) {
+      if (!checkPassword) {
         return apiResponse(
           res,
           httpStatus.BAD_REQUEST,
@@ -129,7 +129,6 @@ const login = {
 
       const token = getToken({
         id: user.id,
-        email: req.body.email,
       })
 
       return apiResponse(
@@ -154,7 +153,67 @@ const login = {
   }
 }
 
+const getUserByToken = {
+  validator: celebrate({
+    body: Joi.object().keys({
+
+    })
+  }),
+  controller: async (req: any, res: Response) => {
+    try {
+
+      const userRepo = getRepository(User);
+      
+      const user = await userRepo.findOne({
+        where: { id: req.user.id },
+      });
+
+      if (!user) {
+        return apiResponse(
+          res,
+          httpStatus.NOT_FOUND,
+          null,
+          "Error",
+          "User not found with this token"
+        )
+      }
+
+      const result = {
+        id: user.id,
+        avatar: user.avatar,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        user_name: user.user_name,
+        email: user.email,
+        nationality: user.nationality,
+        mobile: user.mobile,
+        dob: user.dob
+      }
+
+      return apiResponse(
+        res,
+        httpStatus.OK,
+        result,
+        "User got successfull",
+        null
+      )
+
+    } catch (error) {
+
+      return apiResponse(
+        res,
+        httpStatus.BAD_GATEWAY,
+        null,
+        "Error",
+        "Error in controller: " + error
+      )
+
+    }
+  }
+}
+
 export {
   signup,
-  login
+  login,
+  getUserByToken
 }
